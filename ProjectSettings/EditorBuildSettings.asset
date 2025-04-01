@@ -4,5 +4,8 @@
 EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
-  m_Scenes: []
+  m_Scenes:
+  - enabled: 1
+    path: Assets/Thuan/Chat.unity
+    guid: a9df783cc8d308140a943ea13328eae6
   m_configObjects: {}

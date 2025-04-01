@@ -1,0 +1,54 @@
+{
+    "name": "ok",
+    "maps": [
+        {
+            "name": "Chat",
+            "id": "40882d60-468a-452c-a8e2-24fd886f3a3a",
+            "actions": [
+                {
+                    "name": "ChatStart",
+                    "type": "Button",
+                    "id": "79f55f37-9256-45ed-8753-e3b557ee8ca7",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ChatSend",
+                    "type": "Button",
+                    "id": "7dd56c46-23b5-469c-8674-fdb63b1be4aa",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "04878338-f8ae-442f-8cf3-582b77274d6c",
+                    "path": "<Keyboard>/c",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChatStart",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "6ad88136-d451-44b4-8f9b-80abcf2d218c",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ChatSend",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
+        }
+    ],
+    "controlSchemes": []
+}
