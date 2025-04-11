@@ -149,5 +149,22 @@ namespace Starter.Shooter
 			var interpolator = new NetworkBehaviourBufferInterpolator(this);
 			return interpolator.Int(nameof(_networkHealth)) > 0;
 		}
-	}
+        public void Heal(int amount)
+        {
+            if (IsAlive == false)
+                return;
+
+            RPC_Heal(amount);
+        }
+
+        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+        private void RPC_Heal(int amount)
+        {
+            if (IsAlive)
+            {
+                _networkHealth = Mathf.Min(_networkHealth + amount, InitialHealth); // Không vượt quá máu gốc
+            }
+        }
+
+    }
 }

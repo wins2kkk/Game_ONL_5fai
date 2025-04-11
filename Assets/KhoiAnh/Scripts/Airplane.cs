@@ -37,7 +37,7 @@ namespace Starter.Shooter
                 }
                 else
                 {
-                    Debug.LogError("Chưa gán điểm A hoặc điểm B!");
+                    //Debug.LogError("Chưa gán điểm A hoặc điểm B!");
                 }
             }
         }
@@ -50,7 +50,7 @@ namespace Starter.Shooter
 
             if (pointA == null || pointB == null)
             {
-                Debug.LogError("Chưa gán điểm A hoặc điểm B!");
+               // Debug.LogError("Chưa gán điểm A hoặc điểm B!");
                 return;
             }
 

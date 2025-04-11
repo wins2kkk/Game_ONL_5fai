@@ -248,37 +248,38 @@ namespace Starter.Shooter
 				Fire();
 			}
 		}
+        private void OnTriggerEnter(Collider other)
+        {
+            if (other.CompareTag("HealthPack"))
+            {
+                Health.Heal(1); // Hồi 0.5 máu mỗi lần
+                Destroy(other.gameObject); // Xóa HealthPack sau khi sử dụng
+            }
+        }
 
-		private void Fire()
-		{
-			// Clear hit position in case nothing will be hit
-			_hitPosition = Vector3.zero;
+        private void Fire()
+        {
+            _hitPosition = Vector3.zero;
 
-			// Whole projectile path and effects are immediately processed (= hitscan projectile)
-			if (Physics.Raycast(CameraHandle.position, CameraHandle.forward, out var hitInfo, 200f, HitMask))
-			{
-				// Deal damage
-				var health = hitInfo.collider != null ? hitInfo.collider.GetComponentInParent<Health>() : null;
-				if (health != null)
-				{
-					health.Killed = OnEnemyKilled;
-					health.TakeHit(1, true);
-				}
+            if (Physics.Raycast(CameraHandle.position, CameraHandle.forward, out var hitInfo, 200f, HitMask))
+            {
+                var health = hitInfo.collider != null ? hitInfo.collider.GetComponentInParent<Health>() : null;
+                if (health != null)
+                {
+                    health.Killed = OnEnemyKilled;
+                    health.TakeHit(1, true);
+                }
 
-				// Save hit point to correctly show bullet path on all clients.
-				// This however works only for single projectile per FUN and with higher fire cadence
-				// some projectiles might not be fired on proxies because we save only the position
-				// of the LAST hit.
-				_hitPosition = hitInfo.point;
-				_hitNormal = hitInfo.normal;
-			}
+              
+                _hitPosition = hitInfo.point;
+                _hitNormal = hitInfo.normal;
+            }
 
-			// In this example projectile count property (fire count) is used not only for weapon fire effects
-			// but to spawn the projectile visuals themselves.
-			_fireCount++;
-		}
+            _fireCount++;
+        }
 
-		private void Respawn(Vector3 position)
+
+        private void Respawn(Vector3 position)
 		{
 			ChickenKills = 0;
 			Health.Revive();
@@ -330,11 +331,11 @@ namespace Starter.Shooter
 		{
 			if (_isJumping)
 			{
-				AudioSource.PlayClipAtPoint(JumpAudioClip, KCC.Position, 0.5f);
+				//AudioSource.PlayClipAtPoint(JumpAudioClip, KCC.Position, 0.5f);
 			}
 			else
 			{
-				AudioSource.PlayClipAtPoint(LandAudioClip, KCC.Position, 1f);
+				//AudioSource.PlayClipAtPoint(LandAudioClip, KCC.Position, 1f);
 			}
 
 			if (HasStateAuthority == false)
@@ -350,5 +351,6 @@ namespace Starter.Shooter
 
 			Nameplate.SetNickname(Nickname);
 		}
+
 	}
 }

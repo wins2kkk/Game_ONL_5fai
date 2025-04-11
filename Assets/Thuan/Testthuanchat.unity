@@ -1435,9 +1435,6 @@ MonoBehaviour:
   - {fileID: 1447627734}
   - {fileID: 469694148}
   HitIndicator: {fileID: 1152280794}
-  AudioSource: {fileID: 1259515377}
-  ChickenKillClip: {fileID: 8300000, guid: 960fba484aacf9645a8c6f23b9672dac, type: 3}
-  HitReceivedClip: {fileID: 8300000, guid: ef7a92aa16b64ab4bb59e7af66aed3d9, type: 3}
   DeathClip: {fileID: 8300000, guid: 960fba484aacf9645a8c6f23b9672dac, type: 3}
 --- !u!1001 &537583842
 PrefabInstance:

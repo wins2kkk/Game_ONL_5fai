@@ -21,9 +21,9 @@ namespace Starter.Shooter
 		public CanvasGroup HitIndicator;
 
 		[Header("UI Sound Setup")]
-		public AudioSource AudioSource;
-		public AudioClip ChickenKillClip;
-		public AudioClip HitReceivedClip;
+		//public AudioSource AudioSource;
+		//public AudioClip ChickenKillClip;
+		//public AudioClip HitReceivedClip;
 		public AudioClip DeathClip;
 
 		private int _lastChickens = -1;
@@ -65,8 +65,8 @@ namespace Starter.Shooter
 					// Show hit received
 					HitIndicator.alpha = 1f;
 
-					var clip = isAlive ? HitReceivedClip : DeathClip;
-					AudioSource.PlayOneShot(clip);
+					//var clip = isAlive ? HitReceivedClip : DeathClip;
+					//AudioSource.PlayOneShot(clip);
 				}
 
 				_lastHealth = player.Health.CurrentHealth;
@@ -84,7 +84,7 @@ namespace Starter.Shooter
 			{
 				if (player.ChickenKills > _lastChickens && player.ChickenKills > 0)
 				{
-					AudioSource.PlayOneShot(ChickenKillClip);
+					//AudioSource.PlayOneShot(ChickenKillClip);
 				}
 
 				_lastChickens = player.ChickenKills;
