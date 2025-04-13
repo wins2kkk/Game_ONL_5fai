@@ -5,10 +5,13 @@ EditorBuildSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 2
   m_Scenes:
-  - enabled: 1
+  - enabled: 0
     path: Assets/HoanThien/start.unity
     guid: 45eab07f39b2b624dba2ff6d66f68ed1
-  - enabled: 1
+  - enabled: 0
     path: Assets/HoanThien/Game.unity
     guid: a576230320078824cb6e927ff32551fb
+  - enabled: 1
+    path: Assets/Thuan/Testthuanchat.unity
+    guid: 00fb057afb8f03e4493b807546885f63
   m_configObjects: {}

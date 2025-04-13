@@ -38,8 +38,10 @@ namespace Starter
 			await Disconnect();
 
 			PlayerPrefs.SetString("PlayerName", NicknameText.text);
+            ChatManager.Instance.Initialize(NicknameText.text);
 
-			_runnerInstance = Instantiate(RunnerPrefab);
+
+            _runnerInstance = Instantiate(RunnerPrefab);
 
 			// Add listener for shutdowns so we can handle unexpected shutdowns
 			var events = _runnerInstance.GetComponent<NetworkEvents>();
@@ -113,7 +115,7 @@ namespace Starter
 		private void Update()
 		{
 			// Enter/Esc key is used for locking/unlocking cursor in game view.
-			if (Input.GetKeyDown(KeyCode.Return) || Input.GetKeyDown(KeyCode.Escape))
+			if ( Input.GetKeyDown(KeyCode.Escape))
 			{
 				TogglePanelVisibility();
 			}

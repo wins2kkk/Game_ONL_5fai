@@ -7010,12 +7010,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fb9deb030c3fd3a4fa4f745f46141498, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chatEntryCanvas: {fileID: 3331550383820859423}
-  chatEntryInput: {fileID: 2925293634487120006}
-  chatBody: {fileID: 519998515939566057}
-  startChat: {fileID: -5535065251497792500, guid: ffddd409775464743b6be4edb989b570, type: 3}
-  sendChat: {fileID: 7458941782319037830, guid: ffddd409775464743b6be4edb989b570, type: 3}
-  PlayersName: Player
+  inputField: {fileID: 0}
+  sendButton: {fileID: 0}
+  chatContent: {fileID: 0}
 --- !u!1 &4408343293810375551
 GameObject:
   m_ObjectHideFlags: 0
@@ -13525,7 +13522,6 @@ MonoBehaviour:
   - {fileID: 4775452621535443650}
   - {fileID: 7598917700963692617}
   - {fileID: 1112872831017273655}
-  - {fileID: 6205887183029846915}
   ForceRemoteRenderTimeframe: 0
 --- !u!114 &6337766268668766878
 MonoBehaviour:
