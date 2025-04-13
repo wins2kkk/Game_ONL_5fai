@@ -86,7 +86,7 @@ namespace Starter.Shooter
 
             NetworkTransform.Teleport(startPosition, Quaternion.LookRotation(PointB - PointA));
 
-            Debug.Log($"Máy bay đã respawn tại {startPosition} với điểm A: {newPointA}, điểm B: {newPointB}");
+            //Debug.Log($"Máy bay đã respawn tại {startPosition} với điểm A: {newPointA}, điểm B: {newPointB}");
         }
 
 

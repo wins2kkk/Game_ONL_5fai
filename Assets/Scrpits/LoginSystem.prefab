@@ -1,0 +1,60 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &291208126402885815
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5481432979510876053}
+  - component: {fileID: 1378251833604861102}
+  m_Layer: 0
+  m_Name: LoginSystem
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5481432979510876053
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 291208126402885815}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 1.5503701, y: -1.2999434, z: 170.01828}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1378251833604861102
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 291208126402885815}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3f810007f962c584fa1c44a664aaab01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  TopText: {fileID: 0}
+  MessageText: {fileID: 0}
+  EmailLoginInput: {fileID: 0}
+  PasswordLoginInput: {fileID: 0}
+  LoginPage: {fileID: 0}
+  UserNameRegisterInput: {fileID: 0}
+  EmailRegisterInput: {fileID: 0}
+  PassworRegisterInput: {fileID: 0}
+  ResgisterPage: {fileID: 0}
+  EmailRecoveryInput: {fileID: 0}
+  RecoveryPage: {fileID: 0}
+  WelcomeObject: {fileID: 0}
+  WelcomeText: {fileID: 0}
+  gameManager: {fileID: 0}

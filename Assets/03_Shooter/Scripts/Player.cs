@@ -48,7 +48,7 @@ namespace Starter.Shooter
 		public AudioSource FireSound;
 		public AudioSource FootstepSound;
 		public AudioClip JumpAudioClip;
-		public AudioClip LandAudioClip;
+		//public AudioClip LandAudioClip;
 
 		[Header("VFX")]
 		public ParticleSystem DustParticles;
