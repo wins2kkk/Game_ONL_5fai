@@ -5,255 +5,239 @@ using UnityEngine.Rendering;
 
 namespace Starter.Shooter
 {
-	/// <summary>
-	/// Main player scrip - controls player movement and animations.
-	/// </summary>
-	public sealed class Player : NetworkBehaviour
-	{
-		[Header("References")]
-		public Health Health;
-		public SimpleKCC KCC;
-		public PlayerInput PlayerInput;
-		public Animator Animator;
-		public Transform CameraPivot;
-		public Transform CameraHandle;
-		public Transform ScalingRoot;
-		public UINameplate Nameplate;
-		public Collider Hitbox;
-		public Renderer[] HeadRenderers;
-		public GameObject[] FirstPersonOverlayObjects;
+    /// <summary>
+    /// Script chính điều khiển nhân vật người chơi - bao gồm di chuyển và hoạt ảnh.
+    /// </summary>
+    public sealed class Player : NetworkBehaviour // Kế thừa từ Fusion.NetworkBehaviour để hỗ trợ multiplayer
+    {
+        // Các tham chiếu đến các thành phần liên quan
+        [Header("References")]
+        public Health Health; // Xử lý máu của nhân vật
+        public SimpleKCC KCC; // Điều khiển di chuyển nhân vật (Kinematic Character Controller của Fusion)
+        public PlayerInput PlayerInput; // Dữ liệu input của người chơi
+        public Animator Animator; // Bộ điều khiển hoạt ảnh
+        public Transform CameraPivot; // Gốc xoay camera (ảnh hưởng tới ngực nhân vật)
+        public Transform CameraHandle; // Điểm đặt camera (phục vụ raycast bắn)
+        public Transform ScalingRoot; // Gốc để scale nhân vật (khi nhảy)
+        public UINameplate Nameplate; // Tên người chơi hiển thị trên đầu
+        public Collider Hitbox; // Va chạm khi bị bắn
+        public Renderer[] HeadRenderers; // Dùng để ẩn đầu khi nhìn góc nhìn thứ nhất
+        public GameObject[] FirstPersonOverlayObjects; // Các object hiển thị riêng trong overlay camera (ví dụ: vũ khí)
 
-		[Header("Movement Setup")]
-		public float WalkSpeed = 2f;
-		public float JumpImpulse = 10f;
-		public float UpGravity = 25f;
-		public float DownGravity = 40f;
+        // Cấu hình di chuyển
+        [Header("Movement Setup")]
+        public float WalkSpeed = 2f; // Tốc độ đi bộ
+        public float JumpImpulse = 10f; // Lực nhảy
+        public float UpGravity = 25f; // Trọng lực khi đi lên
+        public float DownGravity = 40f; // Trọng lực khi rơi
 
-		[Header("Movement Accelerations")]
-		public float GroundAcceleration = 55f;
-		public float GroundDeceleration = 25f;
-		public float AirAcceleration = 25f;
-		public float AirDeceleration = 1.3f;
+        [Header("Movement Accelerations")]
+        public float GroundAcceleration = 55f; // Tăng tốc khi đang đứng trên mặt đất
+        public float GroundDeceleration = 25f; // Giảm tốc khi đứng trên đất
+        public float AirAcceleration = 25f; // Tăng tốc khi đang bay
+        public float AirDeceleration = 1.3f; // Giảm tốc khi đang bay
 
-		[Header("Fire Setup")]
-		public LayerMask HitMask;
-		public GameObject ImpactPrefab;
-		public ParticleSystem MuzzleParticle;
+        // Cấu hình bắn
+        [Header("Fire Setup")]
+        public LayerMask HitMask; // Layer cho raycast
+        public GameObject ImpactPrefab; // Hiệu ứng va chạm
+        public ParticleSystem MuzzleParticle; // Hiệu ứng súng bắn
 
-		[Header("Animation Setup")]
-		public Transform ChestTargetPosition;
-		public Transform ChestBone;
+        // Cấu hình hoạt ảnh
+        [Header("Animation Setup")]
+        public Transform ChestTargetPosition; // Vị trí ngực mong muốn (phục vụ IK)
+        public Transform ChestBone; // Bone ngực trong Rig
 
-		[Header("Sounds")]
-		public AudioSource FireSound;
-		public AudioSource FootstepSound;
-		public AudioClip JumpAudioClip;
-		public AudioClip LandAudioClip;
+        // Âm thanh
+        [Header("Sounds")]
+        public AudioSource FireSound;
+        public AudioSource FootstepSound;
+        public AudioClip JumpAudioClip;
 
-		[Header("VFX")]
-		public ParticleSystem DustParticles;
+        [Header("VFX")]
+        public ParticleSystem DustParticles; // Hạt bụi khi đi bộ
 
-		[Networked, HideInInspector, Capacity(24), OnChangedRender(nameof(OnNicknameChanged))]
-		public string Nickname { get; set; }
-		[Networked, HideInInspector]
-		public int ChickenKills { get; set; }
+        // Biến mạng (Networked Variables)
+        [Networked, HideInInspector, Capacity(24), OnChangedRender(nameof(OnNicknameChanged))]
+        public string Nickname { get; set; } // Tên người chơi
 
-		[Networked, OnChangedRender(nameof(OnJumpingChanged))]
-		private NetworkBool _isJumping { get; set; }
-		[Networked]
-		private Vector3 _hitPosition { get; set; }
-		[Networked]
-		private Vector3 _hitNormal { get; set; }
-		[Networked]
-		private int _fireCount { get; set; }
+        [Networked, HideInInspector]
+        public int ChickenKills { get; set; } // Số gà tiêu diệt
 
-		// Animation IDs
-		private int _animIDSpeedX;
-		private int _animIDSpeedZ;
-		private int _animIDMoveSpeedZ;
-		private int _animIDGrounded;
-		private int _animIDPitch;
-		private int _animIDShoot;
+        [Networked, OnChangedRender(nameof(OnJumpingChanged))]
+        private NetworkBool _isJumping { get; set; } // Trạng thái đang nhảy
 
-		private Vector3 _moveVelocity;
-		private int _visibleFireCount;
+        [Networked] private Vector3 _hitPosition { get; set; } // Vị trí bắn trúng
+        [Networked] private Vector3 _hitNormal { get; set; } // Hướng pháp tuyến tại điểm trúng
+        [Networked] private int _fireCount { get; set; } // Số lần bắn
 
-		private GameManager _gameManager;
+        // ID animation (được hash từ tên animation)
+        private int _animIDSpeedX;
+        private int _animIDSpeedZ;
+        private int _animIDMoveSpeedZ;
+        private int _animIDGrounded;
+        private int _animIDPitch;
+        private int _animIDShoot;
 
-		public override void Spawned()
-		{
-			if (HasStateAuthority)
-			{
-				_gameManager = FindObjectOfType<GameManager>();
+        private Vector3 _moveVelocity; // Vận tốc di chuyển thực tế
+        private int _visibleFireCount; // Biến đếm để xử lý hiệu ứng bắn
 
-				// Set player nickname that is saved in UIGameMenu
-				Nickname = PlayerPrefs.GetString("PlayerName");
-			}
+        private GameManager _gameManager;
 
-			// In case the nickname is already changed,
-			// we need to trigger the change manually
-			OnNicknameChanged();
+        public override void Spawned()
+        {
+            // Nếu là chủ sở hữu trạng thái (StateAuthority)
+            if (HasStateAuthority)
+            {
+                _gameManager = FindObjectOfType<GameManager>();
 
-			// Reset visible fire count
-			_visibleFireCount = _fireCount;
+                // Lấy nickname từ PlayerPrefs
+                Nickname = PlayerPrefs.GetString("PlayerName");
+            }
 
-			if (HasStateAuthority)
-			{
-				// For input authority deactivate head renderers so they are not obstructing the view
-				for (int i = 0; i < HeadRenderers.Length; i++)
-				{
-					HeadRenderers[i].shadowCastingMode = ShadowCastingMode.ShadowsOnly;
-				}
+            OnNicknameChanged(); // Cập nhật hiển thị tên
+            _visibleFireCount = _fireCount; // Reset bộ đếm bắn
 
-				// Some objects (e.g. weapon) are renderer with secondary Overlay camera.
-				// This prevents weapon clipping into the wall when close to the wall.
-				int overlayLayer = LayerMask.NameToLayer("FirstPersonOverlay");
-				for (int i = 0; i < FirstPersonOverlayObjects.Length; i++)
-				{
-					FirstPersonOverlayObjects[i].layer = overlayLayer;
-				}
+            if (HasStateAuthority)
+            {
+                // Ẩn đầu để không cản tầm nhìn
+                foreach (var head in HeadRenderers)
+                    head.shadowCastingMode = ShadowCastingMode.ShadowsOnly;
 
-				// Look rotation interpolation is skipped for local player.
-				// Look rotation is set manually in Render.
-				KCC.Settings.ForcePredictedLookRotation = true;
-			}
-		}
+                // Đặt layer cho vũ khí về "FirstPersonOverlay"
+                int overlayLayer = LayerMask.NameToLayer("FirstPersonOverlay");
+                foreach (var obj in FirstPersonOverlayObjects)
+                    obj.layer = overlayLayer;
 
-		public override void FixedUpdateNetwork()
-		{
-			if (KCC.Position.y < -15f)
-			{
-				// Player fell, let's kill him
-				Health.TakeHit(1000);
-			}
+                // Tắt nội suy xoay cho người chơi local
+                KCC.Settings.ForcePredictedLookRotation = true;
+            }
+        }
 
-			if (Health.IsFinished)
-			{
-				// Player is dead and death timer is finished, let's respawn the player
-				Respawn(_gameManager.GetSpawnPosition());
-			}
+        public override void FixedUpdateNetwork()
+        {
+            // Rơi khỏi bản đồ
+            if (KCC.Position.y < -15f)
+            {
+                Health.TakeHit(1000);
+            }
 
-			var input = Health.IsAlive ? PlayerInput.CurrentInput : default;
-			ProcessInput(input);
+            // Nếu chết và hết thời gian chết => hồi sinh
+            if (Health.IsFinished)
+            {
+                Respawn(_gameManager.GetSpawnPosition());
+            }
 
-			if (KCC.IsGrounded)
-			{
-				// Stop jumping
-				_isJumping = false;
-			}
+            var input = Health.IsAlive ? PlayerInput.CurrentInput : default;
+            ProcessInput(input); // Xử lý input
 
-			KCC.SetActive(Health.IsAlive);
+            // Nếu chạm đất thì ngừng nhảy
+            if (KCC.IsGrounded)
+                _isJumping = false;
 
-			PlayerInput.ResetInput();
-		}
+            // Kích hoạt KCC nếu còn sống
+            KCC.SetActive(Health.IsAlive);
+            PlayerInput.ResetInput(); // Reset input sau mỗi frame
+        }
 
-		public override void Render()
-		{
-			if (HasStateAuthority)
-			{
-				// Set look rotation for Render.
-				KCC.SetLookRotation(PlayerInput.CurrentInput.LookRotation, -90f, 90f);
-			}
+        public override void Render()
+        {
+            if (HasStateAuthority)
+            {
+                // Cập nhật hướng nhìn
+                KCC.SetLookRotation(PlayerInput.CurrentInput.LookRotation, -90f, 90f);
+            }
 
-			// Transform velocity vector to local space.
-			var moveSpeed = transform.InverseTransformVector(KCC.RealVelocity);
+            // Cập nhật hoạt ảnh di chuyển
+            var moveSpeed = transform.InverseTransformVector(KCC.RealVelocity);
+            Animator.SetFloat(_animIDSpeedX, moveSpeed.x, 0.1f, Time.deltaTime);
+            Animator.SetFloat(_animIDSpeedZ, moveSpeed.z, 0.1f, Time.deltaTime);
+            Animator.SetBool(_animIDGrounded, KCC.IsGrounded);
+            Animator.SetFloat(_animIDPitch, KCC.GetLookRotation(true, false).x, 0.02f, Time.deltaTime);
 
-			Animator.SetFloat(_animIDSpeedX, moveSpeed.x, 0.1f, Time.deltaTime);
-			Animator.SetFloat(_animIDSpeedZ, moveSpeed.z, 0.1f, Time.deltaTime);
-			Animator.SetBool(_animIDGrounded, KCC.IsGrounded);
-			Animator.SetFloat(_animIDPitch, KCC.GetLookRotation(true, false).x, 0.02f, Time.deltaTime);
+            // Bật tiếng bước chân nếu đang chạy dưới đất
+            FootstepSound.enabled = KCC.IsGrounded && KCC.RealSpeed > 1f;
 
-			FootstepSound.enabled = KCC.IsGrounded && KCC.RealSpeed > 1f;
-			ScalingRoot.localScale = Vector3.Lerp(ScalingRoot.localScale, Vector3.one, Time.deltaTime * 8f);
+            // Hiệu ứng co giãn khi nhảy hoặc chạy
+            ScalingRoot.localScale = Vector3.Lerp(ScalingRoot.localScale, Vector3.one, Time.deltaTime * 8f);
 
-			var emission = DustParticles.emission;
-			emission.enabled = KCC.IsGrounded && KCC.RealSpeed > 1f;
+            // Bật bụi nếu đang đi bộ trên đất
+            var emission = DustParticles.emission;
+            emission.enabled = KCC.IsGrounded && KCC.RealSpeed > 1f;
 
-			ShowFireEffects();
+            // Hiệu ứng khi bắn
+            ShowFireEffects();
 
-			// Disable hits when player is dead
-			Hitbox.enabled = Health.IsAlive;
-		}
+            // Tắt hitbox nếu đã chết
+            Hitbox.enabled = Health.IsAlive;
+        }
 
-		private void Awake()
-		{
-			AssignAnimationIDs();
-		}
+        private void Awake()
+        {
+            AssignAnimationIDs(); // Lấy ID animation từ tên
+        }
 
-		private void LateUpdate()
-		{
-			if (Health.IsAlive == false)
-				return;
+        private void LateUpdate()
+        {
+            if (!Health.IsAlive)
+                return;
 
-			// Update camera pivot (influences ChestIK)
-			// (KCC look rotation is set earlier in Render)
-			var pitchRotation = KCC.GetLookRotation(true, false);
-			CameraPivot.localRotation = Quaternion.Euler(pitchRotation);
+            // Cập nhật xoay camera (ảnh hưởng tới chest IK)
+            var pitchRotation = KCC.GetLookRotation(true, false);
+            CameraPivot.localRotation = Quaternion.Euler(pitchRotation);
 
-			// Dummy IK solution, we are snapping chest bone to prepared ChestTargetPosition position
-			// Lerping blends the fixed position with little bit of animation position.
-			float blendAmount = HasStateAuthority ? 0.05f : 0.2f;
-			ChestBone.position = Vector3.Lerp(ChestTargetPosition.position, ChestBone.position, blendAmount);
-			ChestBone.rotation = Quaternion.Lerp(ChestTargetPosition.rotation, ChestBone.rotation, blendAmount);
+            // Blend vị trí chest IK
+            float blendAmount = HasStateAuthority ? 0.05f : 0.2f;
+            ChestBone.position = Vector3.Lerp(ChestTargetPosition.position, ChestBone.position, blendAmount);
+            ChestBone.rotation = Quaternion.Lerp(ChestTargetPosition.rotation, ChestBone.rotation, blendAmount);
 
-			// Only local player needs to update the camera
-			if (HasStateAuthority)
-			{
-				// Transfer properties from camera handle to Main Camera.
-				Camera.main.transform.SetPositionAndRotation(CameraHandle.position, CameraHandle.rotation);
-			}
-		}
+            // Nếu là người chơi local thì cập nhật camera
+            if (HasStateAuthority)
+            {
+                Camera.main.transform.SetPositionAndRotation(CameraHandle.position, CameraHandle.rotation);
+            }
+        }
 
-		private void ProcessInput(GameplayInput input)
-		{
-			KCC.SetLookRotation(input.LookRotation, -90f, 90f);
+        private void ProcessInput(GameplayInput input)
+        {
+            KCC.SetLookRotation(input.LookRotation, -90f, 90f);
+            KCC.SetGravity(KCC.RealVelocity.y >= 0f ? UpGravity : DownGravity);
 
-			// It feels better when player falls quicker
-			KCC.SetGravity(KCC.RealVelocity.y >= 0f ? UpGravity : DownGravity);
+            var moveDirection = KCC.TransformRotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
+            var desiredMoveVelocity = moveDirection * WalkSpeed;
 
-			// Calculate correct move direction from input (rotated based on latest KCC rotation)
-			var moveDirection = KCC.TransformRotation * new Vector3(input.MoveDirection.x, 0f, input.MoveDirection.y);
-			var desiredMoveVelocity = moveDirection * WalkSpeed;
+            float acceleration = desiredMoveVelocity == Vector3.zero
+                ? (KCC.IsGrounded ? GroundDeceleration : AirDeceleration)
+                : (KCC.IsGrounded ? GroundAcceleration : AirAcceleration);
 
-			float acceleration;
-			if (desiredMoveVelocity == Vector3.zero)
-			{
-				// No desired move velocity - we are stopping.
-				acceleration = KCC.IsGrounded == true ? GroundDeceleration : AirDeceleration;
-			}
-			else
-			{
-				acceleration = KCC.IsGrounded == true ? GroundAcceleration : AirAcceleration;
-			}
+            _moveVelocity = Vector3.Lerp(_moveVelocity, desiredMoveVelocity, acceleration * Runner.DeltaTime);
+            float jumpImpulse = 0f;
 
-			_moveVelocity = Vector3.Lerp(_moveVelocity, desiredMoveVelocity, acceleration * Runner.DeltaTime);
-			float jumpImpulse = 0f;
+            if (KCC.IsGrounded && input.Jump)
+            {
+                jumpImpulse = JumpImpulse;
+                _isJumping = true;
+            }
 
-			// Comparing current input buttons to previous input buttons - this prevents glitches when input is lost
-			if (KCC.IsGrounded && input.Jump)
-			{
-				// Set world space jump vector
-				jumpImpulse = JumpImpulse;
-				_isJumping = true;
-			}
+            KCC.Move(_moveVelocity, jumpImpulse);
 
-			KCC.Move(_moveVelocity, jumpImpulse);
+            // Cập nhật Camera Pivot
+            var pitchRotation = KCC.GetLookRotation(true, false);
+            CameraPivot.localRotation = Quaternion.Euler(pitchRotation);
 
-			// Update camera pivot so fire transform (CameraHandle) is correct
-			var pitchRotation = KCC.GetLookRotation(true, false);
-			CameraPivot.localRotation = Quaternion.Euler(pitchRotation);
+            // Xử lý bắn
+            if (input.Fire)
+            {
+                Fire();
+            }
+        }
 
-			if (input.Fire)
-			{
-				Fire();
-			}
-		}
         private void OnTriggerEnter(Collider other)
         {
             if (other.CompareTag("HealthPack"))
             {
-                Health.Heal(1); // Hồi 0.5 máu mỗi lần
-                Destroy(other.gameObject); // Xóa HealthPack sau khi sử dụng
+                Health.Heal(1); // Hồi máu
+                Destroy(other.gameObject); // Xóa pack
             }
         }
 
@@ -264,13 +248,13 @@ namespace Starter.Shooter
             if (Physics.Raycast(CameraHandle.position, CameraHandle.forward, out var hitInfo, 200f, HitMask))
             {
                 var health = hitInfo.collider != null ? hitInfo.collider.GetComponentInParent<Health>() : null;
+
                 if (health != null)
                 {
                     health.Killed = OnEnemyKilled;
                     health.TakeHit(1, true);
                 }
 
-              
                 _hitPosition = hitInfo.point;
                 _hitNormal = hitInfo.normal;
             }
@@ -278,79 +262,60 @@ namespace Starter.Shooter
             _fireCount++;
         }
 
-
         private void Respawn(Vector3 position)
-		{
-			ChickenKills = 0;
-			Health.Revive();
+        {
+            ChickenKills = 0;
+            Health.Revive();
+            KCC.SetPosition(position);
+            KCC.SetLookRotation(0f, 0f);
+            _moveVelocity = Vector3.zero;
+        }
 
-			KCC.SetPosition(position);
-			KCC.SetLookRotation(0f, 0f);
+        private void OnEnemyKilled(Health enemyHealth)
+        {
+            ChickenKills += enemyHealth.GetComponent<Chicken>() != null ? 1 : -10;
+        }
 
-			_moveVelocity = Vector3.zero;
-		}
+        private void ShowFireEffects()
+        {
+            if (_visibleFireCount < _fireCount)
+            {
+                FireSound.PlayOneShot(FireSound.clip);
+                MuzzleParticle.Play();
+                Animator.SetTrigger(_animIDShoot);
 
-		private void OnEnemyKilled(Health enemyHealth)
-		{
-			// Killing chicken grants 1 point, killing other player has -10 points penalty.
-			ChickenKills += enemyHealth.GetComponent<Chicken>() != null ? 1 : -10;
-		}
+                if (_hitPosition != Vector3.zero)
+                {
+                    Instantiate(ImpactPrefab, _hitPosition, Quaternion.LookRotation(_hitNormal));
+                }
+            }
 
-		private void ShowFireEffects()
-		{
-			// Notice we are not using OnChangedRender for fireCount property but instead
-			// we are checking against a local variable and show fire effects only when visible
-			// fire count is SMALLER. This prevents triggering false fire effects when
-			// local player mispredicted fire (e.g. input got lost) and fireCount property got decreased.
-			if (_visibleFireCount < _fireCount)
-			{
-				FireSound.PlayOneShot(FireSound.clip);
-				MuzzleParticle.Play();
-				Animator.SetTrigger(_animIDShoot);
+            _visibleFireCount = _fireCount;
+        }
 
-				if (_hitPosition != Vector3.zero)
-				{
-					// Impact gets destroyed automatically with DestroyAfter script
-					Instantiate(ImpactPrefab, _hitPosition, Quaternion.LookRotation(_hitNormal));
-				}
-			}
+        private void AssignAnimationIDs()
+        {
+            _animIDSpeedX = Animator.StringToHash("SpeedX");
+            _animIDSpeedZ = Animator.StringToHash("SpeedZ");
+            _animIDGrounded = Animator.StringToHash("Grounded");
+            _animIDPitch = Animator.StringToHash("Pitch");
+            _animIDShoot = Animator.StringToHash("Shoot");
+        }
 
-			_visibleFireCount = _fireCount;
-		}
+        private void OnJumpingChanged()
+        {
+            if (HasStateAuthority == false)
+            {
+                ScalingRoot.localScale = _isJumping ? new Vector3(0.5f, 1.5f, 0.5f) : new Vector3(1.25f, 0.75f, 1.25f);
+            }
+        }
 
-		private void AssignAnimationIDs()
-		{
-			_animIDSpeedX = Animator.StringToHash("SpeedX");
-			_animIDSpeedZ = Animator.StringToHash("SpeedZ");
-			_animIDGrounded = Animator.StringToHash("Grounded");
-			_animIDPitch = Animator.StringToHash("Pitch");
-			_animIDShoot = Animator.StringToHash("Shoot");
-		}
+        private void OnNicknameChanged()
+        {
+            if (HasStateAuthority)
+                return;
 
-		private void OnJumpingChanged()
-		{
-			if (_isJumping)
-			{
-				//AudioSource.PlayClipAtPoint(JumpAudioClip, KCC.Position, 0.5f);
-			}
-			else
-			{
-				//AudioSource.PlayClipAtPoint(LandAudioClip, KCC.Position, 1f);
-			}
-
-			if (HasStateAuthority == false)
-			{
-				ScalingRoot.localScale = _isJumping ? new Vector3(0.5f, 1.5f, 0.5f) : new Vector3(1.25f, 0.75f, 1.25f);
-			}
-		}
-
-		private void OnNicknameChanged()
-		{
-			if (HasStateAuthority)
-				return; // Do not show nickname for local player
-
-			Nameplate.SetNickname(Nickname);
-		}
-
-	}
+            Nameplate.SetNickname(Nickname);
+        }
+    }
 }

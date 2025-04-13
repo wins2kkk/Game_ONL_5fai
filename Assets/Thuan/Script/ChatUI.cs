@@ -63,6 +63,9 @@ public class ChatUI : MonoBehaviour
             ChatManager.Instance.SendChatMessage(message);
             inputField.text = "";
             inputField.ActivateInputField();
+            System.DateTime now = System.DateTime.Now;
+            Debug.Log("Current Time: " + now.ToString("HH:mm:ss"));
+
         }
     }
 }

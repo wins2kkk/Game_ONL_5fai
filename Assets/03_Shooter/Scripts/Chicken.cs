@@ -11,7 +11,7 @@ namespace Starter.Shooter
 		[Header("References")]
 		public Health Health;
 		public NetworkTransform NetworkTransform;
-		public ParticleSystem FlyParticles;
+		//public ParticleSystem FlyParticles;
 
 		// Properties are used only on master client however it needs
 		// to be networked to properly work when master client is changed.
@@ -53,11 +53,11 @@ namespace Starter.Shooter
 			transform.Translate(Vector3.forward * _speed * Runner.DeltaTime, Space.Self);
 		}
 
-		public override void Render()
-		{
-			var emission = FlyParticles.emission;
-			emission.enabled = Health.IsAlive;
-		}
+		//public override void Render()
+		//{
+		//	//var emission = FlyParticles.emission;
+		//	//emission.enabled = Health.IsAlive;
+		//}
 
 		private void OnTriggerEnter(Collider other)
 		{

@@ -33,6 +33,8 @@ public class ChatManager : MonoBehaviour, IChatClientListener
         {
             Debug.LogWarning("ChatClient chưa được khởi tạo. Hãy gọi ChatManager.Instance.Initialize(nickname)");
         }
+        
+
     }
 
 
@@ -71,10 +73,19 @@ public class ChatManager : MonoBehaviour, IChatClientListener
     {
         for (int i = 0; i < messages.Length; i++)
         {
-            string msg = $"{senders[i]}: {messages[i]}";
-            chatUI.chatContent.text += msg + "\n";
+            string sender = senders[i];
+            string message = messages[i].ToString();
+
+            // Gán màu khác nhau tùy người gửi
+            string senderColor = sender == PhotonNetwork.NickName ? "#00FFFF" : "#FF69B4";     // Ví dụ: bạn là xanh, người khác là hồng
+            string messageColor = sender == PhotonNetwork.NickName ? "#FFFFFF" : "#DDDDDD";    // Màu tin nhắn cũng khác
+
+            string formattedMsg = $"<color={senderColor}>{sender}</color>: <color={messageColor}>{message}</color>";
+
+            chatUI.chatContent.text += formattedMsg + "\n";
         }
     }
+
 
     public void OnPrivateMessage(string sender, object message, string channelName)
     {

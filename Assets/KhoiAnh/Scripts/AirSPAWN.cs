@@ -7,10 +7,10 @@ namespace Starter.Shooter
     public class AirSPAWN : NetworkBehaviour
     {
         public Airplane AirplanePrefab;
-        public int MaxAirplanes = 10;
+        public int MaxAirplanes = 30;
         public float SpawnRadius = 100f;
-        public float SpawnHeightMin = 50f;
-        public float SpawnHeightMax = 150f;
+        public float SpawnHeightMin = 30f;
+        public float SpawnHeightMax = 100f;
         public float SpawnInterval = 10f;
 
         private List<Airplane> _airplanes = new List<Airplane>();
