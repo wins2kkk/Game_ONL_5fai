@@ -54,7 +54,7 @@ public class ChatUI : MonoBehaviour
             }
         }
     }
-
+    //iểm tra nếu không rỗng thì gửi tin nhắn đó thông qua ChatManager
     private void SendMessage()
     {
         string message = inputField.text;
